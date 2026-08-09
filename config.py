@@ -43,7 +43,7 @@ class ScriptConfigData:
     ability_4_key: str = "R"
 
     hotkey_toggle: str = "F7"
-    hotkey_exit: str = "F8"
+    hotkey_exit: str = "F9"
 
     on_health_below_threshold: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
     on_mana_below_threshold: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
@@ -79,6 +79,10 @@ class ScriptConfig:
 
     def load(self) -> None:
         self.configData = ScriptConfigData()
+
+        if not os.path.exists(self.path):
+            self.save()
+            return
 
         with open(self.path) as f:
             data = json.load(f)

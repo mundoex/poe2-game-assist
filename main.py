@@ -80,7 +80,6 @@ def run_game_logic():
 if __name__ == "__main__":
     g_config = ScriptConfig(ScriptConfig.get_default_config_path())
     g_config.load()
-    g_config.save()
 
     g_size = get_window_geometry()[2:4]
 
