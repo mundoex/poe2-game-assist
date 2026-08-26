@@ -42,9 +42,22 @@ def is_red_color(rgb: RGB, hue_tolerance_deg=30, min_saturation=0.35, min_red=15
     return hue_distance <= hue_tolerance_deg and saturation >= min_saturation
 
 
-def is_green_color(rgb: RGB, dominance_threshold=20, min_green=60) -> bool:
-    """Return True if green is meaningfully stronger than red and blue."""
+def is_green_color(
+    rgb: RGB,
+    dominance_threshold=20,
+    min_green=60,
+    dark_max_channel=59,
+    dark_dominance_threshold=5,
+) -> bool:
+    """Return True if green is meaningfully stronger than red and blue.
+
+    Dim pixels (e.g. a shadowed health bar) use a lower relative-dominance
+    check since their absolute channel gaps are too small for the normal
+    thresholds, e.g. (14, 20, 4) or (30, 40, 11).
+    """
     r, g, b = rgb
+    if max(r, g, b) <= dark_max_channel:
+        return g > r and g - b >= dark_dominance_threshold
     return (
         g >= min_green
         and g - r >= dominance_threshold
@@ -56,6 +69,27 @@ def is_pink_color(rgb: RGB, min_hue_deg=290, max_hue_deg=345, min_saturation=0.3
     """Return True if hue falls in the magenta/pink band, away from pure red."""
     r, g, b = rgb
     if r < min_red:
+        return False
+    hue_deg, saturation = _hue_saturation_deg(rgb)
+    return min_hue_deg <= hue_deg <= max_hue_deg and saturation >= min_saturation
+
+
+def is_near_black(rgb: RGB, max_channel=2) -> bool:
+    """Return True if all channels are at or near zero, e.g. (0, 0, 0) or (2, 1, 0).
+
+    Used to discard unreliable pixel reads (loading screens, alt-tab transitions,
+    the window not being fully rendered yet) so they don't get misread as an
+    empty/below-threshold bar.
+    """
+    r, g, b = rgb
+    return max(r, g, b) <= max_channel
+
+
+def is_purple_color(rgb: RGB, min_hue_deg=260, max_hue_deg=290, min_saturation=0.35, min_value=0.15) -> bool:
+    """Return True if hue falls in the purple/violet band, between blue and pink (e.g. (47, 15, 58))."""
+    r, g, b = rgb
+    value = max(r, g, b) / 255
+    if value < min_value:
         return False
     hue_deg, saturation = _hue_saturation_deg(rgb)
     return min_hue_deg <= hue_deg <= max_hue_deg and saturation >= min_saturation

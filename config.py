@@ -50,9 +50,11 @@ class ScriptConfigData:
     on_rage_below_threshold: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
     on_energy_shield_below_threshold: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
     on_poison: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
+    on_shocked: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
     on_repeat: ThresholdActionConfig = field(default_factory=ThresholdActionConfig)
 
     debug: bool = False
+    draw_script_state_overlay: bool = True
 
 def _apply_config_data(instance, data: dict) -> None:
     for f in fields(instance):

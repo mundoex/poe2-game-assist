@@ -121,18 +121,28 @@ class UI(IConfigurable):
 
         y = 0
         status_text = canvas.create_text(self.is_running_text_pos[0], self.is_running_text_pos[1], text="Paused", fill="white", anchor="sw", font=("Arial", 10, "bold"))
+        frame_text = canvas.create_text(self.screen_w - 10, 10, text="", fill="white", anchor="ne", font=("Arial", 10, "bold"))
 
         def _poll():
             if self._overlay_stop.is_set():
                 self._overlay_canvas = None
                 root.destroy()
             else:
-                canvas.itemconfig(status_text, text="Running" if self.running else "Paused")
-                self.clear_debug_pixels()
-                self.draw_debug_pixels(self._debug_points())
-                root.after(100, _poll)
+                if self.config.configData.draw_script_state_overlay:
+                    canvas.itemconfig(status_text, text="Running" if self.running else "Paused")
+                    if self.config.configData.debug:
+                        canvas.itemconfig(frame_text, text=f"frame: {self.game_controller.frame}")
+                    else:
+                        canvas.itemconfig(frame_text, text="")
+                    self.clear_debug_pixels()
+                    self.draw_debug_pixels(self._debug_points())
+                else:
+                    canvas.itemconfig(status_text, text="")
+                    canvas.itemconfig(frame_text, text="")
+                    self.clear_debug_pixels()
+                root.after(self.config.configData.check_screen_rate_ms, _poll)
 
-        root.after(100, _poll)
+        root.after(self.config.configData.check_screen_rate_ms, _poll)
         root.mainloop()
 
     def _open_config_editor(self, icon=None, item=None):

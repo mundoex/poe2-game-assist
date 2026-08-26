@@ -7,3 +7,4 @@ class PathOfExile2GameState:
     is_mana_below_threshold: bool = False
     is_rage_below_threshold: bool = False
     is_energy_shield_below_threshold: bool = False
+    is_shocked: bool = False

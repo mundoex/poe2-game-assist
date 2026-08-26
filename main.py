@@ -3,6 +3,7 @@ from functools import wraps
 import keyboard
 from config import ScriptConfig, ThresholdActionConfig
 from PathOfExile2GameStateController import PathOfExile2GameStateController
+from EventInfo import EventInfo
 from ui import UI
 from screen_utils import get_window_name, get_window_geometry
 
@@ -38,34 +39,52 @@ def only_when_poe2_active(fn):
             return fn(*args, **kwargs)
     return wrapper
 
+def log_event_info(name: str, info: EventInfo) -> None:
+    """Pretty-prints an EventInfo, bracketed by separators so consecutive events are easy to tell apart in the console."""
+    separator = "-" * 70
+    print(separator)
+    print(f"| EVENT: {name}  (frame {info.frame})")
+    print(f"|   value:                    {info.value}")
+    print(f"|   health_pixels_rgb:        {info.health_pixels_rgb}")
+    print(f"|   energy_shield_pixels_rgb: {info.energy_shield_pixels_rgb}")
+    print(f"|   poison_pixel_rgb:         {info.poison_pixel_rgb}")
+    print(f"|   mana_pixel_rgb:           {info.mana_pixel_rgb}")
+    print(f"|   rage_pixel_rgb:           {info.rage_pixel_rgb}")
+    print(separator)
+
 @only_when_poe2_active
-def on_health_below_threshold(is_below: bool):
-    print(f"[event] on_health_below_threshold: {is_below}")
+def on_health_below_threshold(info: EventInfo):
+    #log_event_info("on_health_below_threshold", info)
     run_threshold_actions(g_config.configData.on_health_below_threshold)
 
 @only_when_poe2_active
-def on_mana_below_threshold(is_below: bool):
-    print(f"[event] on_mana_below_threshold: {is_below}")
+def on_mana_below_threshold(info: EventInfo):
+    # log_event_info("on_mana_below_threshold", info)
     run_threshold_actions(g_config.configData.on_mana_below_threshold)
 
 @only_when_poe2_active
-def on_energy_shield_below_threshold(is_below: bool):
-    print(f"[event] on_energy_shield_below_threshold: {is_below}")
+def on_energy_shield_below_threshold(info: EventInfo):
+    # log_event_info("on_energy_shield_below_threshold", info)
     run_threshold_actions(g_config.configData.on_energy_shield_below_threshold)
 
 @only_when_poe2_active
-def on_rage_below_threshold(is_below: bool):
-    print(f"[event] on_rage_below_threshold: {is_below}")
+def on_rage_below_threshold(info: EventInfo):
+    # log_event_info("on_rage_below_threshold", info)
     run_threshold_actions(g_config.configData.on_rage_below_threshold)
 
 @only_when_poe2_active
-def on_poison(is_poison: bool):
-    print(f"[event] on_poison: {is_poison}")
+def on_poison(info: EventInfo):
+    # log_event_info("on_poison", info)
     run_threshold_actions(g_config.configData.on_poison)
 
 @only_when_poe2_active
-def on_repeat(_: bool):
-    print(f"[event] on_repeat")
+def on_shocked(info: EventInfo):
+    # log_event_info("on_shocked", info)
+    run_threshold_actions(g_config.configData.on_shocked)
+
+@only_when_poe2_active
+def on_repeat(info: EventInfo):
+    # log_event_info("on_repeat", info)
     run_threshold_actions(g_config.configData.on_repeat)
 
 def run_game_logic():
@@ -91,6 +110,7 @@ if __name__ == "__main__":
     g_game_controller.events.on("on_energy_shield_below_threshold", on_energy_shield_below_threshold)
     g_game_controller.events.on("on_rage_below_threshold", on_rage_below_threshold)
     g_game_controller.events.on("on_poison", on_poison)
+    g_game_controller.events.on("on_shocked", on_shocked)
     g_game_controller.events.on("on_repeat", on_repeat)
 
     threading.Thread(target=g_ui.run_overlay, daemon=True).start()
